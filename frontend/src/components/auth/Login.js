@@ -11,6 +11,9 @@ import {
   Typography,
 } from "@mui/material";
 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,8 +32,15 @@ function Login() {
       console.log(response.data, "user dataaaaaaaaaaaaaa");
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
-      navigate("/");
-    } catch (error) {}
+      toast.success("Login successful!", {
+        position: "top-right",
+      });
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+    } catch (error) {
+      toast.error("Login failed. Please check your credentials.");
+    }
   }
 
   return (
@@ -48,6 +58,7 @@ function Login() {
         component={"form"}
         onSubmit={login}
       >
+        <ToastContainer />
         <CardContent>
           <Typography
             variant="h5"

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { Axios } from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
@@ -18,60 +18,61 @@ import ActiveUser from "../Inbox/ActiveUser";
 import Message from "../Inbox/Message";
 import Chatlist from "../Inbox/Chatlist";
 import { io } from "socket.io-client";
-import { getChatUser } from "../../utils/helper";
+import { getChatUser, updateChatList } from "../../utils/helper";
 import MessageInput from "../Inbox/MessageInput";
 
 import messageImg from "../../images/message.jfif";
+import AxiosInstance from "../../utils/AxiosInstance";
+import { useUserContext } from "../../context/Context";
 
 function Chat() {
   const [allUsers, setAllUsers] = useState([]);
-  const [chatLists, setChatlists] = useState([]);
-  const [currentUser, setCurrentUser] = useState({});
+  const [chatLists, setChatLists] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeChat, setActiveChat] = useState();
   const messageScrollToBottomRef = useRef();
 
+  const { currentUser } = useUserContext();
+
   const socket = io("http://localhost:5000");
 
   useEffect(() => {
-    socket.on("connect", () => {
-      socket.emit("addUser", JSON.parse(localStorage.getItem("user")));
-    });
-
-    socket.on("new_message", (message) => {
-      const newmessages = [...messages];
-      newmessages.push(message);
-      setMessages(newmessages);
-    });
-  }, [messages]);
-
-  const config = {
-    headers: {
-      authorization: "Bearer " + localStorage.getItem("token"),
-    },
-  };
+    if (socket && currentUser) {
+      socket.on("connect", () => {
+        socket.emit("addUser", currentUser);
+      });
+    }
+  }, [socket, currentUser]);
 
   useEffect(() => {
-    getChat();
-    setCurrentUser(JSON.parse(localStorage.getItem("user")));
-  }, []);
+    if (socket) {
+      socket.on("new_message", (message) => {
+        const newmessages = [...messages];
+        newmessages.push(message);
+        setMessages(newmessages);
+        setChatLists((prev) => updateChatList(prev, message, currentUser));
+      });
+    }
+  }, [socket, messages, setChatLists]);
 
   async function getChat() {
     try {
-      const response = await axios.get("/chatlist", config);
-      setChatlists(response.data);
+      const response = await AxiosInstance.get("/chatlist");
+      setChatLists(response.data);
+      console.log(response.data, "chatlistssss");
     } catch (error) {
       console.log(error.request.response);
     }
   }
 
   useEffect(() => {
+    getChat();
     getAllUsers();
   }, []);
 
   const getAllUsers = async () => {
     try {
-      const response = await axios.get("/user", config);
+      const response = await AxiosInstance.get("/user");
       setAllUsers(response.data);
     } catch (error) {}
   };
@@ -79,10 +80,9 @@ function Chat() {
   async function getMessage() {
     const id = activeChat._id;
     try {
-      var response = await axios.get("/message/" + id, config);
+      var response = await AxiosInstance.get("/message/" + id);
       console.log("message", response.data);
       setMessages(response.data);
-      console.log(messageScrollToBottomRef.current, "mccccccccccccccccc");
     } catch (error) {}
   }
 
@@ -93,10 +93,8 @@ function Chat() {
   }, [activeChat]);
 
   useEffect(() => {
-    console.log(messageScrollToBottomRef.current, "current");
     if (messageScrollToBottomRef.current) {
       console.log("ref");
-      console.log(messageScrollToBottomRef.current.scrollHeight, "height");
       messageScrollToBottomRef.current.scrollTop =
         messageScrollToBottomRef.current.scrollHeight;
     }
@@ -147,7 +145,7 @@ function Chat() {
           md={6}
           sx={{ padding: "1rem", borderRight: "1px solid #ddd" }}
         >
-          {messages && messages.length > 0 ? (
+          {activeChat && currentUser ? (
             <>
               <Grid
                 container
@@ -214,6 +212,7 @@ function Chat() {
                   currentUser={currentUser}
                   setMessages={setMessages}
                   socket={socket}
+                  setChatLists={setChatLists}
                 />
               ) : null}
             </>
@@ -240,7 +239,7 @@ function Chat() {
                   user={user}
                   key={user._id}
                   currentUser={currentUser}
-                  setChatlists={setChatlists}
+                  setChatLists={setChatLists}
                   setActiveChat={setActiveChat}
                 />
               );

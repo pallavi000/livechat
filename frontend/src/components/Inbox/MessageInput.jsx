@@ -9,18 +9,18 @@ import {
 import React, { useState } from "react";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SendIcon from "@mui/icons-material/Send";
-import axios from "axios";
-import { getChatUser } from "../../utils/helper";
+import { getChatUser, updateChatList } from "../../utils/helper";
+import AxiosInstance from "../../utils/AxiosInstance";
 
-function MessageInput({ activeChat, currentUser, setMessages, socket }) {
+function MessageInput({
+  activeChat,
+  currentUser,
+  setMessages,
+  socket,
+  setChatLists,
+}) {
   const [text, setText] = useState();
   const receiver_id = getChatUser(activeChat, currentUser);
-
-  const config = {
-    headers: {
-      authorization: "Bearer " + localStorage.getItem("token"),
-    },
-  };
 
   async function handleSendMessage(msg) {
     try {
@@ -30,15 +30,13 @@ function MessageInput({ activeChat, currentUser, setMessages, socket }) {
         chatlist_id: activeChat._id,
         receiver_id: receiver_id._id,
       };
-      const response = await axios.post(
+      const response = await AxiosInstance.post(
         "/message/" + activeChat._id,
-        data,
-        config
+        data
       );
-      console.log(response.data);
       socket.emit("message", response.data);
       setMessages((prev) => [...prev, response.data]);
-      // props.socket.emit("message", response.data);
+      setChatLists((prev) => updateChatList(prev, response.data, currentUser));
     } catch (error) {}
   }
 

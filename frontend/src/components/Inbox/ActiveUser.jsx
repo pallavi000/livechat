@@ -11,27 +11,21 @@ import React from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import axios from "axios";
+import AxiosInstance from "../../utils/AxiosInstance";
 
-function ActiveUser({ user, currentUser, setChatlists, setActiveChat }) {
-  const config = {
-    headers: {
-      authorization: "Bearer " + localStorage.getItem("token"),
-    },
-  };
-
+function ActiveUser({ user, currentUser, setChatLists, setActiveChat }) {
   const startChat = async () => {
     try {
       const data = {
         sender_id: currentUser._id,
       };
-      const response = await axios.post(
+      const response = await AxiosInstance.post(
         `/chatlist/chat/${user._id}`,
-        data,
-        config
+        data
       );
       setActiveChat(response.data);
 
-      setChatlists((prev) => {
+      setChatLists((prev) => {
         const existingChat = prev.find(
           (chat) => chat._id === response.data._id
         );

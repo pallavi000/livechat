@@ -10,10 +10,16 @@ import {
 } from "@mui/material";
 import React from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { formatLastMessageTime, getChatUser } from "../../utils/helper";
+import {
+  formatLastMessageTime,
+  getChatUser,
+  isMessageFromMe,
+} from "../../utils/helper";
 
 function Chatlist({ chat, currentUser, activeChat, setActiveChat }) {
   const receiver = getChatUser(chat, currentUser);
+
+  const isFromMe = isMessageFromMe(chat, currentUser);
 
   return (
     <ListItem
@@ -47,7 +53,7 @@ function Chatlist({ chat, currentUser, activeChat, setActiveChat }) {
               textOverflow={"ellipsis"}
               color={"text.secondary"}
             >
-              {chat?.last_message}
+              {isFromMe ? <>You: {chat?.last_message}</> : chat?.last_message}
             </Typography>
           }
         />

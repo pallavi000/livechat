@@ -41,3 +41,21 @@ export function formatLastMessageTime(mongooseCreatedAt) {
     return createdAtMoment.format("MMM D");
   }
 }
+
+export function updateChatList(chatList, message, currentUser) {
+  const cacheChat = [...chatList];
+  const receiver_id = getChatUser(message, currentUser);
+  const findChatIndex = cacheChat.findIndex(
+    (chat) =>
+      chat.sender_id?._id === receiver_id?._id ||
+      chat.receiver_id?._id === receiver_id?._id
+  );
+  if (findChatIndex !== -1) {
+    const findChat = cacheChat[findChatIndex];
+    findChat.last_message = message.message;
+    findChat.updatedAt = message.createdAt;
+    cacheChat.splice(findChatIndex, 1);
+    return [findChat, ...cacheChat];
+  }
+  return chatList;
+}
