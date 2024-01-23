@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -36,7 +36,7 @@ function Login() {
         position: "top-right",
       });
       setTimeout(() => {
-        navigate("/");
+        window.location.href = "/";
       }, 1000);
     } catch (error) {
       toast.error("Login failed. Please check your credentials.");
@@ -85,6 +85,10 @@ function Login() {
             <Button type="submit" variant="contained">
               Submit
             </Button>
+
+            <Box textAlign={"center"}>
+              Don't have an account? <Link to={"/register"}>Sing Up</Link>
+            </Box>
           </Stack>
         </CardContent>
       </Card>

@@ -12,7 +12,7 @@ const ChatListSchema = new mongoose.Schema(
       required: true,
       ref: "user",
     },
-    last_message: { type: String },
+    last_message: { type: mongoose.Schema.Types.ObjectId, ref: "message" },
   },
   {
     timestamps: true,
@@ -22,6 +22,7 @@ const ChatListSchema = new mongoose.Schema(
 const autoUserPopulate = function (next) {
   this.populate("sender_id");
   this.populate("receiver_id");
+  this.populate("last_message");
   next();
 };
 

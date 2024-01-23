@@ -35,6 +35,11 @@ function MessageInput({
         data
       );
       socket.emit("message", response.data);
+
+      socket.emit("not_typing", {
+        chat: activeChat,
+        socketUserId: receiver_id._id,
+      });
       setMessages((prev) => [...prev, response.data]);
       setChatLists((prev) => updateChatList(prev, response.data, currentUser));
     } catch (error) {}
@@ -48,6 +53,20 @@ function MessageInput({
     }
   };
 
+  const handleKeyUp = async (e) => {
+    if (e.target.value) {
+      socket.emit("typing", {
+        chat: activeChat,
+        socketUserId: receiver_id._id,
+      });
+    } else {
+      socket.emit("not_typing", {
+        chat: activeChat,
+        socketUserId: receiver_id._id,
+      });
+    }
+  };
+
   return (
     <>
       <Divider sx={{ width: "100%" }} />
@@ -58,6 +77,7 @@ function MessageInput({
           autoComplete="off"
           fullWidth
           value={text}
+          onKeyUp={handleKeyUp}
           onChange={(e) => setText(e.target.value)}
           onKeyPress={handleKeyPress}
           InputProps={{

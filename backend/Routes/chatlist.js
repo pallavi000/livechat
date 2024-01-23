@@ -3,11 +3,11 @@ const router = Router();
 const Chatlist = require("../Models/ChatList");
 const auth = require("../Middleware/auth");
 const mongoose = require("mongoose");
+const Message = require("../Models/Message");
 
 // Get all chatlists
 router.get("/", auth, async (req, res) => {
   try {
-    console.log(req.user._id);
     const chatlists = await Chatlist.find()
       .or([
         { sender_id: req.user._id },
@@ -15,6 +15,7 @@ router.get("/", auth, async (req, res) => {
       ])
       .populate("sender_id")
       .populate("receiver_id")
+      .populate("last_message")
       .sort({ updatedAt: -1 });
     res.send(chatlists);
   } catch (error) {
@@ -57,6 +58,7 @@ router.post("/chat/:id", auth, async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const chatlist = await Chatlist.findById(req.params.id);
+
     res.send(chatlist);
   } catch (error) {
     res.status(500).send(error.message);

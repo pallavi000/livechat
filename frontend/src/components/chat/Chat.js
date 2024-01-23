@@ -1,6 +1,6 @@
-import axios, { Axios } from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Avatar,
   Box,
   Card,
   Grid,
@@ -18,10 +18,15 @@ import ActiveUser from "../Inbox/ActiveUser";
 import Message from "../Inbox/Message";
 import Chatlist from "../Inbox/Chatlist";
 import { io } from "socket.io-client";
-import { getChatUser, updateChatList } from "../../utils/helper";
+import {
+  getChatUser,
+  updateChatList,
+  updateMessageStatus,
+} from "../../utils/helper";
 import MessageInput from "../Inbox/MessageInput";
 
 import messageImg from "../../images/message.jfif";
+import emptyChatImg from "../../images/emptyChat.png";
 import AxiosInstance from "../../utils/AxiosInstance";
 import { useUserContext } from "../../context/Context";
 
@@ -31,6 +36,7 @@ function Chat() {
   const [messages, setMessages] = useState([]);
   const [activeChat, setActiveChat] = useState();
   const messageScrollToBottomRef = useRef();
+  const [isTyping, setIsTyping] = useState(false);
 
   const { currentUser } = useUserContext();
 
@@ -52,8 +58,30 @@ function Chat() {
         setMessages(newmessages);
         setChatLists((prev) => updateChatList(prev, message, currentUser));
       });
+
+      socket.on("seen_message", (chat) => {
+        setChatLists((prev) => updateMessageStatus(chat, prev));
+      });
+
+      socket.on("typing", (chat) => {
+        console.log(isTyping, chat);
+        if (chat._id === activeChat?._id) {
+          setIsTyping(true);
+        }
+      });
+
+      socket.on("not_typing", (chat) => {
+        console.log(isTyping, chat);
+        if (chat._id === activeChat?._id) {
+          setIsTyping(false);
+        }
+      });
     }
-  }, [socket, messages, setChatLists]);
+  }, [socket, messages, setChatLists, activeChat]);
+
+  useEffect(() => {
+    setIsTyping(false);
+  }, [activeChat]);
 
   async function getChat() {
     try {
@@ -111,40 +139,64 @@ function Chat() {
         position: "relative",
       }}
     >
-      <Grid container spacing={3}>
+      <Grid container>
         <Grid
           item
           md={4}
-          sx={{ borderRight: "1px solid #ddd", height: "100%" }}
+          xs={12}
+          sx={{
+            borderRight: "1px solid #ddd",
+            minHeight: "100vh",
+            maxHeight: "100%",
+            alignItems: "flex-start",
+          }}
         >
           <Typography
-            variant="h5"
+            variant="h6"
             sx={{
-              fontWeight: "700",
+              fontWeight: "600",
               marginBottom: "1rem",
               textAlign: "center",
             }}
           >
-            Messages
+            Chats
           </Typography>
-          <List>
-            {chatLists.map((chat) => {
-              return (
-                <Chatlist
-                  chat={chat}
-                  currentUser={currentUser}
-                  activeChat={activeChat}
-                  setActiveChat={setActiveChat}
-                />
-              );
-            })}
-          </List>
+          {chatLists && chatLists.length > 0 ? (
+            <List>
+              {chatLists.map((chat) => {
+                return (
+                  <Chatlist
+                    chat={chat}
+                    currentUser={currentUser}
+                    activeChat={activeChat}
+                    setActiveChat={setActiveChat}
+                    setChatLists={setChatLists}
+                    socket={socket}
+                  />
+                );
+              })}
+            </List>
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "60vh",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
+              <Avatar
+                src={emptyChatImg}
+                variant="square"
+                sx={{ width: "50%", height: "auto", textAlign: "center" }}
+              />
+              <Typography variant="h6">No Chats !!</Typography>
+            </Box>
+          )}
         </Grid>
-        <Grid
-          item
-          md={6}
-          sx={{ padding: "1rem", borderRight: "1px solid #ddd" }}
-        >
+        <Grid item md={6} xs={12} sx={{ borderRight: "1px solid #ddd" }}>
           {activeChat && currentUser ? (
             <>
               <Grid
@@ -153,7 +205,9 @@ function Chat() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  borderBottom: "1px solid black",
+                  paddingX: 2,
+                  paddingY: 1,
+                  borderBottom: "1px solid #ddd",
                 }}
               >
                 <Grid
@@ -186,6 +240,7 @@ function Chat() {
                   <MenuIcon />
                 </Grid>
               </Grid>
+
               <Box
                 sx={{
                   marginTop: "1rem",
@@ -206,6 +261,8 @@ function Chat() {
                   );
                 })}
               </Box>
+              {isTyping &&
+                `${getChatUser(activeChat, currentUser)?.name} is typing ....`}
               {activeChat && currentUser ? (
                 <MessageInput
                   activeChat={activeChat}
@@ -221,30 +278,39 @@ function Chat() {
               <Typography variant="h6" fontWeight={"600"} textAlign={"center"}>
                 Start Conversation with your love ones
               </Typography>
-              <img src={messageImg} height={"80%"} />
+              <Stack justifyContent={"center"} alignItems={"center"}>
+                <img src={messageImg} width={"80%"} height={"auto"} />
+              </Stack>
             </>
           )}
         </Grid>
-        <Grid item md={2}>
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: "700", marginBottom: "1rem" }}
-          >
-            Active users
-          </Typography>
-          <List>
-            {allUsers.map((user) => {
-              return (
-                <ActiveUser
-                  user={user}
-                  key={user._id}
-                  currentUser={currentUser}
-                  setChatLists={setChatLists}
-                  setActiveChat={setActiveChat}
-                />
-              );
-            })}
-          </List>
+        <Grid item md={2} xs={12} sx={{ width: "100%" }}>
+          <Box sx={{ width: "100%" }}>
+            <Typography
+              variant="h6"
+              textAlign={"center"}
+              sx={{
+                fontWeight: "600",
+                marginBottom: "1rem",
+                textAlign: "center",
+              }}
+            >
+              Active users
+            </Typography>
+            <List>
+              {allUsers.map((user) => {
+                return (
+                  <ActiveUser
+                    user={user}
+                    key={user._id}
+                    currentUser={currentUser}
+                    setChatLists={setChatLists}
+                    setActiveChat={setActiveChat}
+                  />
+                );
+              })}
+            </List>
+          </Box>
         </Grid>
       </Grid>
     </Card>

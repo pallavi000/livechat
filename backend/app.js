@@ -37,7 +37,6 @@ function removeUserBySocketId(id) {
 
 io.on("connection", (socket) => {
   socket.on("addUser", (user) => {
-    console.log(user, "socket user");
     var oldUser = findUserById(user._id);
     if (!oldUser) {
       addUser(user._id, socket.id);
@@ -52,6 +51,27 @@ io.on("connection", (socket) => {
     var user = findUserById(message.receiver_id._id);
     if (user) {
       io.to(user.socket_id).emit("new_message", message);
+    }
+  });
+
+  socket.on("seen", ({ chat, socketUserId }) => {
+    var user = findUserById(socketUserId);
+    if (user) {
+      io.to(user.socket_id).emit("seen_message", chat);
+    }
+  });
+
+  socket.on("typing", ({ chat, socketUserId }) => {
+    var user = findUserById(socketUserId);
+    if (user) {
+      io.to(user.socket_id).emit("typing", chat);
+    }
+  });
+
+  socket.on("not_typing", ({ chat, socketUserId }) => {
+    var user = findUserById(socketUserId);
+    if (user) {
+      io.to(user.socket_id).emit("not_typing", chat);
     }
   });
 

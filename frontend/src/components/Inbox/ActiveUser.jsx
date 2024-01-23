@@ -6,6 +6,9 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Chip,
 } from "@mui/material";
 import React from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -23,6 +26,7 @@ function ActiveUser({ user, currentUser, setChatLists, setActiveChat }) {
         `/chatlist/chat/${user._id}`,
         data
       );
+
       setActiveChat(response.data);
 
       setChatLists((prev) => {
@@ -48,10 +52,20 @@ function ActiveUser({ user, currentUser, setChatLists, setActiveChat }) {
       }
     >
       <ListItemButton>
-        <ListItemIcon>
-          <AccountCircleIcon fontSize="large" />
-        </ListItemIcon>
-        <ListItemText primary={user.name} />
+        <ListItemText
+          children={
+            <Stack direction={"row"} gap={1} alignItems={"center"}>
+              <AccountCircleIcon fontSize="large" />
+
+              <Typography
+                fontWeight={"500"}
+                sx={{ textTransform: "capitalize" }}
+              >
+                {user.name}
+              </Typography>
+            </Stack>
+          }
+        />
       </ListItemButton>
     </ListItem>
   );

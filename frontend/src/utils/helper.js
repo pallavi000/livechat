@@ -52,10 +52,21 @@ export function updateChatList(chatList, message, currentUser) {
   );
   if (findChatIndex !== -1) {
     const findChat = cacheChat[findChatIndex];
-    findChat.last_message = message.message;
+    findChat.last_message = message;
     findChat.updatedAt = message.createdAt;
     cacheChat.splice(findChatIndex, 1);
     return [findChat, ...cacheChat];
   }
   return chatList;
+}
+
+export function updateMessageStatus(chat, chatList) {
+  const cacheList = [...chatList];
+  const findIndex = cacheList.findIndex((list) => list._id === chat._id);
+  if (findIndex !== -1) {
+    if (cacheList[findIndex] && cacheList[findIndex]?.last_message) {
+      cacheList[findIndex].last_message.is_read = true;
+    }
+  }
+  return cacheList;
 }
