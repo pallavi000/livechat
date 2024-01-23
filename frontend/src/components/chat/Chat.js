@@ -14,21 +14,29 @@ import CachedIcon from "@mui/icons-material/Cached";
 import ChatIcon from "@mui/icons-material/Chat";
 import MenuIcon from "@mui/icons-material/Menu";
 
+//components
 import ActiveUser from "../Inbox/ActiveUser";
 import Message from "../Inbox/Message";
 import Chatlist from "../Inbox/Chatlist";
+import MessageInput from "../Inbox/MessageInput";
+
+//socket
 import { io } from "socket.io-client";
+
+//helper
 import {
   getChatUser,
   updateChatList,
   updateMessageStatus,
 } from "../../utils/helper";
-import MessageInput from "../Inbox/MessageInput";
+import AxiosInstance from "../../utils/AxiosInstance";
 
+//context
+import { useUserContext } from "../../context/Context";
+
+//images
 import messageImg from "../../images/message.jfif";
 import emptyChatImg from "../../images/emptyChat.png";
-import AxiosInstance from "../../utils/AxiosInstance";
-import { useUserContext } from "../../context/Context";
 
 function Chat() {
   const [allUsers, setAllUsers] = useState([]);
@@ -40,8 +48,8 @@ function Chat() {
 
   const { currentUser } = useUserContext();
 
+  //socket
   const socket = io("http://localhost:5000");
-
   useEffect(() => {
     if (socket && currentUser) {
       socket.on("connect", () => {
@@ -64,14 +72,12 @@ function Chat() {
       });
 
       socket.on("typing", (chat) => {
-        console.log(isTyping, chat);
         if (chat._id === activeChat?._id) {
           setIsTyping(true);
         }
       });
 
       socket.on("not_typing", (chat) => {
-        console.log(isTyping, chat);
         if (chat._id === activeChat?._id) {
           setIsTyping(false);
         }
@@ -87,10 +93,7 @@ function Chat() {
     try {
       const response = await AxiosInstance.get("/chatlist");
       setChatLists(response.data);
-      console.log(response.data, "chatlistssss");
-    } catch (error) {
-      console.log(error.request.response);
-    }
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -109,7 +112,6 @@ function Chat() {
     const id = activeChat._id;
     try {
       var response = await AxiosInstance.get("/message/" + id);
-      console.log("message", response.data);
       setMessages(response.data);
     } catch (error) {}
   }
@@ -122,7 +124,6 @@ function Chat() {
 
   useEffect(() => {
     if (messageScrollToBottomRef.current) {
-      console.log("ref");
       messageScrollToBottomRef.current.scrollTop =
         messageScrollToBottomRef.current.scrollHeight;
     }

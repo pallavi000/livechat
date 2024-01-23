@@ -1,7 +1,8 @@
-import { Box, Grid, Stack, TextField, Tooltip } from "@mui/material";
+import { Box, Stack, Tooltip } from "@mui/material";
 import React from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
+//helper
 import { formatLastMessageTime, isMessageFromMe } from "../../utils/helper";
 
 function Message({ message, currentUser }) {

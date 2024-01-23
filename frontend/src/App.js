@@ -1,8 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import axios from "axios";
+
+//components
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
-import axios from "axios";
 import Chat from "./components/chat/Chat";
 import { UserProvider } from "./context/Context";
 import UserProtected from "./protected/UserProtected";

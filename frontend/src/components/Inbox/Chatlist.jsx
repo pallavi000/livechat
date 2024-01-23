@@ -1,6 +1,5 @@
+import React from "react";
 import {
-  Box,
-  Grid,
   ListItem,
   ListItemButton,
   ListItemIcon,
@@ -8,8 +7,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import React from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+
+//helper
 import {
   formatLastMessageTime,
   getChatUser,
@@ -26,13 +26,10 @@ function Chatlist({
   socket,
 }) {
   const receiver = getChatUser(chat, currentUser);
-  console.log(chat.last_message, "last_message");
-
   const isFromMe = isMessageFromMe(chat.last_message, currentUser);
 
   const handleClick = () => {
     setActiveChat(chat);
-
     setChatLists((prev) => updateMessageStatus(chat, prev));
     socket.emit("seen", { chat, socketUserId: receiver._id });
   };

@@ -18,8 +18,6 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const navigate = useNavigate();
-
   async function login(e) {
     console.log(email, password);
     e.preventDefault();

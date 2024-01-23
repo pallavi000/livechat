@@ -1,19 +1,15 @@
 import {
   Stack,
   Typography,
-  Box,
   ListItem,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
-  ListItemAvatar,
-  Avatar,
-  Chip,
 } from "@mui/material";
 import React from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
-import axios from "axios";
+
+//axios
 import AxiosInstance from "../../utils/AxiosInstance";
 
 function ActiveUser({ user, currentUser, setChatLists, setActiveChat }) {
@@ -26,9 +22,7 @@ function ActiveUser({ user, currentUser, setChatLists, setActiveChat }) {
         `/chatlist/chat/${user._id}`,
         data
       );
-
       setActiveChat(response.data);
-
       setChatLists((prev) => {
         const existingChat = prev.find(
           (chat) => chat._id === response.data._id
@@ -38,9 +32,7 @@ function ActiveUser({ user, currentUser, setChatLists, setActiveChat }) {
         }
         return prev;
       });
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (

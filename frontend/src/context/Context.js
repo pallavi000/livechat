@@ -1,7 +1,11 @@
 // UserContext.js
 import React, { createContext, useContext, useEffect, useState } from "react";
-import AxiosInstance from "../utils/AxiosInstance";
 import { useNavigate } from "react-router-dom";
+
+//axios
+import AxiosInstance from "../utils/AxiosInstance";
+
+//component
 import Loader from "../components/Loader";
 
 // Step 1: Create a context
@@ -36,10 +40,6 @@ export const UserProvider = ({ children }) => {
     } else {
       setIsAppReady(true);
     }
-  }, []);
-
-  useEffect(() => {
-    console.log(currentUser, "currentUser");
   }, []);
 
   // Provide the current user and login/logout functions to the context
