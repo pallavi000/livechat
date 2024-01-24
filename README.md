@@ -23,6 +23,6 @@ Features
 
 ## Live page:
 
-soon...
+http://ec2-3-14-253-187.us-east-2.compute.amazonaws.com/
 
 
